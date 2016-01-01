@@ -34,9 +34,9 @@ class Bolus(KnownRecord):
            }
     if self.larger:
       duration = self.head[7] * 30
-      dose = { 'amount': self.head[4]/40.0,
-               'programmed': self.head[2]/40.0,
-               'unabsorbed': self.head[6] / 40.0,
+      dose = { 'amount': lib.BangInt(self.head[3:5])/40.0,
+               'programmed':  lib.BangInt(self.head[1:3])/40.0,
+               'unabsorbed': lib.BangInt(self.head[5:7])/40.0,
                'duration': duration,
                'type': duration > 0 and 'square' or 'normal',
              }
@@ -122,7 +122,7 @@ class BolusWizard(KnownRecord):
       # https://github.com/ps2/minimed_rf/blob/master/lib/minimed_rf/log_entries/bolus_wizard.rb#L102
       sensitivity = int(self.body[4])
       wizard = { 'bg': bg, 'carb_input': carb_input,
-                 'carb_ratio': int(self.body[1])/ 10.0,
+                 'carb_ratio': carb_ratio,
                  'sensitivity': sensitivity,
                  'bg_target_low': int(self.body[5]),
                  'bg_target_high': int(self.body[14]),
@@ -232,5 +232,3 @@ class CalBGForPH(KnownRecord):
 if __name__ == '__main__':
   import doctest
   doctest.testmod( )
-
-
