@@ -13,6 +13,9 @@ class Task (object):
       return self
     else:
       return types.MethodType(self, obj)
+  def validate (self):
+    data = self.response.getData( )
+    self.response.check_output(data)
   @staticmethod
   def func (self, response):
     return response.getData( )
@@ -20,6 +23,7 @@ class Task (object):
     # print "__calll__", inst, self.func
     # self.func( )
     self.response = inst.session.query(self.msg, **kwds)
+    self.validate( )
     return types.MethodType(self.func, inst)(self.response)
     # return self.response.getData( )
 
@@ -73,6 +77,7 @@ class PageIterator (Task):
 class PumpModel (object):
   bolus_strokes = 20
   basal_strokes = 40
+  MMOL_DEFAULT = False
   larger = False
   def __init__(self, model, session):
     self.model = model
@@ -86,6 +91,7 @@ class PumpModel (object):
   read_carb_ratios = Task(commands.ReadCarbRatios512)
   read_bg_targets = Task(commands.ReadBGTargets)
   read_insulin_sensitivies = Task(commands.ReadInsulinSensitivities)
+  read_insulin_sensitivities = Task(commands.ReadInsulinSensitivities)
   read_current_glucose_pages = Task(commands.ReadCurGlucosePageNumber)
   read_current_history_pages = Task(commands.ReadCurPageNumber)
   suspend_pump = Task(commands.PumpSuspend)
@@ -187,6 +193,7 @@ class PumpModel (object):
 
 
 class Model508 (PumpModel):
+  MMOL_DEFAULT = False
   old6cBody = 31
   # XXX: hack to return something.
   def read_status (self, **kwds):
@@ -211,21 +218,29 @@ class Model511 (Model508):
 
 
 class Model512 (Model511):
+  MMOL_DEFAULT = False
   read_basal_profile_std = Task(commands.ReadProfile_STD512)
   read_basal_profile_a = Task(commands.ReadProfile_A512)
   read_basal_profile_b = Task(commands.ReadProfile_B512)
 
 
 class Model515 (Model512):
+  MMOL_DEFAULT = False
   read_bg_targets = Task(commands.ReadBGTargets515)
   read_status = Task(commands.ReadPumpStatus)
   pass
 
+class Model715 (Model515):
+  MMOL_DEFAULT = False
+  pass
+
 class Model522 (Model515):
+  MMOL_DEFAULT = False
   old6cBody = 38
   pass
 
 class Model722 (Model522):
+  MMOL_DEFAULT = False
   pass
 
 class Model523 (Model522):
@@ -245,21 +260,27 @@ class Model730 (Model530):
   pass
 
 class Model540 (Model530):
+  MMOL_DEFAULT = True
   pass
 
 class Model740 (Model540):
+  MMOL_DEFAULT = True
   pass
 
 class Model551 (Model540):
+  MMOL_DEFAULT = True
   pass
 
 class Model751 (Model551):
+  MMOL_DEFAULT = True
   pass
 
 class Model554 (Model551):
+  MMOL_DEFAULT = True
   pass
 
 class Model754 (Model554):
+  MMOL_DEFAULT = True
   pass
 
 known = {
@@ -273,6 +294,7 @@ known = {
 , '540': Model540
 , '551': Model551
 , '554': Model554
+, '715': Model715
 , '722': Model722
 , '723': Model723
 , '723': Model723
