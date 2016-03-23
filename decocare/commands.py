@@ -728,7 +728,7 @@ class ReadRemainingInsulin(PumpCommand):
   basalStrokes = 10.0
   startByte = 0
   endByte = 2
-  
+
   def getData(self):
     data = self.data
     log.info("READ remaining insulin:\n%s" % lib.hexdump(data))
@@ -738,7 +738,7 @@ class ReadRemainingInsulin(PumpCommand):
 class ReadRemainingInsulin523(ReadRemainingInsulin):
   """
   """
-  
+
   basalStrokes = 40.0
   startByte = 2
   endByte = 4
@@ -1454,6 +1454,24 @@ class ReadVCNTRHistory (ReadSensorHistoryData):
 class ReadOtherDevicesIDS (PumpCommand):
   code = 240
 
+
+class ReadCaptureEventEnabled (PumpCommand):
+  code = 241
+
+
+class ChangeCaptureEventEnable (PumpCommand):
+  code = 242
+  params = [0]
+
+  def __init__(self, enabled=True, **kwds):
+    self.params[0] = int(enabled)
+    super(ChangeCaptureEventEnable, self).__init__(**kwds)
+
+
+class ReadConnectDevicesOtherDevicesStatus (PumpCommand):
+  code = 243
+
+
 class FilterHistory (PumpCommand):
   """
 
@@ -1516,6 +1534,10 @@ class TweakAnotherCommand (ManualCommand):
   def config_argparse (klass, parser):
     parser.add_argument('--params', type=int, action="append",
                         help="parameters to format into sent message"
+                       )
+    parser.add_argument('--params_hexline', dest='params', type=lib.decode_hexline,
+                        help="hex string, parameters to format into sent message"
+                        # default=commands.ManualCommand.params
                        )
     parser.add_argument('--descr', type=str,
                         help="Description of command"
